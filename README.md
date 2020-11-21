@@ -4,7 +4,7 @@ Welcome to my discord bot!
 ## Installation
 1. Install Discordia, you can find it [here](https://github.com/SinisterRectus/Discordia). 
 2. Clone this repository. **Note: I have modified 2 files in the voice lib in Discordia, if you want the music module to work then please replace the original files with the files in ``deps/discordia/libs/voice``**
-3. Download youtube-dl (youtube-dl is currently taken down due to DMCA, you will need to find this yourself.)
+3. Download a static (exe) build of youtube-dl, you can find it [here](https://github.com/ytdl-org/youtube-dl/releases).
 4. Place the youtube-dl.exe in your bot directory or somewhere else however you will need to add the program path to your system environment variables.
 5. Repeat steps 3 and 4 for FFmpeg which can be found [here](https://github.com/BtbN/FFmpeg-Builds/releases)
 6. Repeat steps 3 and 4 for both of the required Dynamic Link Libraries ``sodium`` and ``opus`` which can be found [here](https://github.com/SinisterRectus/Discordia/tree/master/bin).
@@ -27,4 +27,4 @@ If anyone has a solution which avoids modification of Discordia but still provid
 
 
 ## Documentation
-I don't really plan on documenting my bot because, as I mentioned above it is for reference.
+I don't really plan on documenting my bot because it is purely for **reference**.
