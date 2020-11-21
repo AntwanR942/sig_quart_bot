@@ -5,9 +5,9 @@ Permissionator = (PermissionatorFile ~= nil and PermissionatorFile ~= false and 
 
 --[[ External Function ]]
 _G.HasPermission = function(Member, Command, Payload)
+    if Member.guild.owner and Member.id == Payload.guild.owner.id then return true end
     if Permissionator[Command] == nil then return false end
     if Permissionator[Command].Roles["everyone"] == true then return true end
-    if Member.guild.owner and Member.id == Payload.guild.owner.id then return true end
     if Member == nil or Member.roles == nil then return false end
 
     if Permissionator[Command].Users[Member.id] then return true end
