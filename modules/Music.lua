@@ -31,21 +31,20 @@ function YTJSON(URL, SearchFor, Payload)
     local VideoData = {}
 
     for _, Format in pairs(YoutubeDLData.formats) do
-        if Format and Format.acodec and Format.acodec ~= "none" and Format.format and Format.url and Format.format:find("audio only") then
-			VideoData.FFmpegURL = Format.url
+        if Format.acodec == nil or Format.acodec ~= "none" then
+            if Format and Format.format and Format.url then
+                VideoData.FFmpegURL = Format.url
 
-			break
+                break
+            end
         end
     end
 
-    if not VideoData.FFmpegURL then return { ["Error"] = "I couldn't find suitable information for your request." } end
+    if not VideoData.FFmpegURL or not YoutubeDLData.duration then return { ["Error"] = "I couldn't find suitable information for your request." } end
 
-	if YoutubeDLData.thumbnail then
-		VideoData.Thumbnail = YoutubeDLData.thumbnail
-	end
-
-    VideoData.Title = YoutubeDLData.title
-	VideoData.VideoURL = YoutubeDLData.webpage_url
+    VideoData.Title = (YoutubeDLData.title or "Unknown Title")
+    VideoData.Thumbnail = (YoutubeDLData.thumbnail or "")
+	VideoData.VideoURL = (YoutubeDLData.webpage_url or "")
 	VideoData.Duration = YoutubeDLData.duration
 	VideoData.Playerr = Payload.author.mentionString
 	VideoData.Channel = Payload.channel
@@ -175,7 +174,7 @@ CommandManager.Command("play", function(Args, Payload)
                     ["description"] = "**Now playing**\n["..CurrentlyPlaying.Title.."]("..CurrentlyPlaying.VideoURL..") ["..Payload.author.mentionString.."]",
                     ["color"] = Config.EmbedColour,
                     ["thumbnail"] = {
-                        ["url"] = (CurrentlyPlaying.Thumbnail ~= nil and CurrentlyPlaying.Thumbnail or "") 
+                        ["url"] = CurrentlyPlaying.Thumbnail
                     }
                 }
             }
@@ -187,7 +186,7 @@ CommandManager.Command("play", function(Args, Payload)
             embed = {
                 ["description"] = "**Added to the queue**\n["..AudioData.Title.."]("..AudioData.VideoURL..") ["..Payload.author.mentionString.."]",
                 ["thumbnail"] = {
-                    ["url"] = (AudioData.Thumbnail ~= nil and AudioData.Thumbnail or "") 
+                    ["url"] = AudioData.Thumbnail
                 },
                 ["color"] = Config.EmbedColour,
                 ["footer"] = {
@@ -226,7 +225,7 @@ CommandManager.Command("skip", function(Args, Payload)
                     ["description"] = "**Now playing**\n["..CurrentlyPlaying.Title.."]("..CurrentlyPlaying.VideoURL..") ["..Payload.author.mentionString.."]",
                     ["color"] = Config.EmbedColour,
                     ["thumbnail"] = {
-                        ["url"] = (CurrentlyPlaying.Thumbnail ~= nil and CurrentlyPlaying.Thumbnail or "") 
+                        ["url"] = CurrentlyPlaying.Thumbnail
                     }
                 }
             }
@@ -310,7 +309,7 @@ CommandManager.Command("time", function(Args, Payload)
         embed = {
             ["description"] = "["..CurrentlyPlaying.Title.."]("..CurrentlyPlaying.VideoURL..") ["..CurrentlyPlaying.Playerr.."]\n"..string.rep("▬", (TimeElapsed/CurrentlyPlaying.Duration*20)-1).."⚪"..string.rep("▬", (20-(TimeElapsed/CurrentlyPlaying.Duration*20))).." "..SecondsToClock(TimeElapsed).."/"..SecondsToClock(CurrentlyPlaying.Duration),
             ["thumbnail"] = {
-                ["url"] = (CurrentlyPlaying.Thumbnail ~= nil and CurrentlyPlaying.Thumbnail or "") 
+                ["url"] = CurrentlyPlaying.Thumbnail
             },
             ["color"] = Config.EmbedColour,
             ["footer"] = {
@@ -413,7 +412,7 @@ Routine.setInterval(1000, function()
                             ["description"] = "**Now playing**\n["..CurrentlyPlaying.Title.."]("..CurrentlyPlaying.VideoURL..") ["..CurrentlyPlaying.Playerr.."]",
                             ["color"] = Config.EmbedColour,
                             ["thumbnail"] = {
-                                ["url"] = (CurrentlyPlaying.Thumbnail ~= nil and CurrentlyPlaying.Thumbnail or "") 
+                                ["url"] = CurrentlyPlaying.Thumbnail
                             }
                         }
                     }
