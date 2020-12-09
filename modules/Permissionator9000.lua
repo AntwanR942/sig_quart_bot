@@ -40,7 +40,7 @@ function AuditPermission(Command, Type, ID, Allow, MRoles, MUsers)
     if #MUsers > 0 then 
         for User in MUsers:iter() do
             if User.id then
-                Permissionator[Command]["Roles"][User.id] = Allow
+                Permissionator[Command]["Users"][User.id] = Allow
             end
         end 
     end

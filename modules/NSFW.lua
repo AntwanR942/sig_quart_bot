@@ -35,7 +35,7 @@ end
 for Dirty, _ in FileReader.scandirSync(ModuleDir.."/"..NSFWFolder) do
 	if Dirty:find("_") == nil then
 		Dirty = Dirty:gsub(".txt", "")
-		local DirtCommand = CommandManager.Command(Dirty:lower(), function(Args, Payload)
+		CommandManager.Command(Dirty:lower(), function(Args, Payload)
 			local URL, IsEmbed = GetNSFW(Dirty, (Args[2] ~= nil and Args[2] == "video" and "_videos" or nil))
 
 			assert(URL ~= nil, "failed to retrieve NSFW content.")
