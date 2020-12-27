@@ -2,7 +2,7 @@
 .token
 Config.json
 discordia*.log
-gateway.json
+gateway*.json
 deps/*
 !deps/CM.lua
 !deps/discordia
@@ -14,6 +14,7 @@ deps/discordia/libs/voice/*.lua
 deps/discordia/libs/voice/streams/*.lua
 !deps/discordia/libs/voice/streams/FFmpegProcess.lua
 _Clash/
+modules/Uploads/
 modules/Clash.lua
 modules/HouseRoles.lua
 modules/Moderation.lua
@@ -22,4 +23,6 @@ modules/Permissionator9000.json
 modules/Tag.json
 modules/UrbanDict.txt
 modules/Math.lua
+modules/SFS.lua
 *.dll
+desktop.ini

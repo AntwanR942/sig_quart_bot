@@ -24,7 +24,7 @@ function GetTag(Args, Index)
 end
 
 function SaveTagFile()
-    assert(FileReader.writeFileSync(ModuleDir.."/Tag.json", JSON.encode(TagArchive, { indent = Config.PrettyJSON })), "failed to save tag file.")
+    assert(FileReader.writeFileSync(ModuleDir.."/Tag.json", JSON.encode(TagArchive)), "failed to save tag file.")
 end
 
 --[[ Command ]]

@@ -14,7 +14,7 @@ UrbanDict = CommandManager.Command("ud", function(Args, Payload)
     Body = assert(JSON.decode(Body), "failed to parse API response.")
     
     local ThisDefinitionInfo = Body.list[1]
-    assert(ThisDefinitionInfo ~= nil and ThisDefinitionInfo.word and ThisDefinitionInfo.definition and ThisDefinitionInfo.permalink and ThisDefinitionInfo.thumbs_up and ThisDefinitionInfo.thumbs_down and ThisDefinitionInfo.example and ThisDefinitionInfo.author, "failed to find definition of term ``"..InputTerm.."``.")
+    assert(ThisDefinitionInfo ~= nil and ThisDefinitionInfo.word and ThisDefinitionInfo.definition and ThisDefinitionInfo.permalink and ThisDefinitionInfo.thumbs_up and ThisDefinitionInfo.thumbs_down and ThisDefinitionInfo.example and ThisDefinitionInfo.author, "could not find definition of the term ``"..InputTerm.."``.")
     ThisDefinitionInfo.example = ThisDefinitionInfo.example:split("\n")[1]
     
     local UDEmbed = {
@@ -41,7 +41,7 @@ UrbanDict = CommandManager.Command("ud", function(Args, Payload)
                 ["name"] = "Author",
                 ["value"] = ThisDefinitionInfo.author,
                 ["inline"] = true
-            },
+            }
         }
     }
 
@@ -52,4 +52,4 @@ UrbanDict = CommandManager.Command("ud", function(Args, Payload)
     Payload:reply { 
         embed = UDEmbed
     }
-end):SetCategory("Fun Commands"):SetDescription("Find Urban Dictionary definition of word.")
+end):SetCategory("Fun Commands"):SetDescription("Find Urban Dictionary definition of a term.")

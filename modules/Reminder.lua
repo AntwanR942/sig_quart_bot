@@ -1,12 +1,12 @@
 --[[ Variables ]]
 ReminderCacheFile = FileReader.readFileSync(ModuleDir.."/Reminder.json")
 if not ReminderCacheFile then Log(2, "Couldn't load reminder cache file, creating a new one..."); FileReader.writeFileSync(ModuleDir.."/Reminder.json", "[]") end
-ReminderCache = (ReminderCacheFile ~= nil and ReminderCacheFile ~= false and assert(JSON.decode(ReminderCacheFile), "failed to parse Reminder.json, command "..Config.Prefix.."remind will not work.") or {})
+ReminderCache = (ReminderCacheFile ~= nil and ReminderCacheFile and assert(JSON.decode(ReminderCacheFile), "failed to parse Reminder.json, command "..Config.Prefix.."remind will not work.") or {})
 
 MaxReminderLength = 500
 
 function SaveReminderFile()
-    assert(FileReader.writeFileSync(ModuleDir.."/Reminder.json", JSON.encode(ReminderCache, { indent = Config.PrettyJSON })), "failed to save Reminder.json file.")
+    assert(FileReader.writeFileSync(ModuleDir.."/Reminder.json", JSON.encode(ReminderCache)), "failed to save Reminder.json file.")
 end
 
 

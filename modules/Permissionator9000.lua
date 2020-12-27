@@ -6,7 +6,7 @@ Permissionator = (PermissionatorFile ~= nil and PermissionatorFile ~= false and 
 --[[ External Function ]]
 _G.HasPermission = function(Member, Command, Payload)
     if Member == nil then return false end
-    if Member.id == Payload.guild.owner.id then return true end
+    if Payload.guild and Payload.guild.owner and Member.id == Payload.guild.owner.id then return true end
     if Permissionator[Command] == nil then return false end
     if Permissionator[Command].Roles["everyone"] and Permissionator[Command].Roles["everyone"] == true then return true end
 
@@ -66,7 +66,7 @@ end
 
 
 function SavePermissionatorFile()
-    assert(FileReader.writeFileSync(ModuleDir.."/Permissionator9000.json", JSON.encode(Permissionator, { indent = Config.PrettyJSON })), "failed to save permissionator file.")
+    assert(FileReader.writeFileSync(ModuleDir.."/Permissionator9000.json", JSON.encode(Permissionator)), "failed to save permissionator file.")
 end
 
 --[[ Command ]]

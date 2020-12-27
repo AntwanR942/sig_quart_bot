@@ -14,7 +14,7 @@ function GetNSFW(Type, Video)
 	if Content then
 		Content = Content:split("\n")
 		math.randomseed(os.time())
-		local RandomIndex = math.random(1, #Content)
+		local RandomIndex = math.floor(math.random() * #Content)
 		local URL = Content[RandomIndex]
 		if URL then 
 			local IsEmbed = false
