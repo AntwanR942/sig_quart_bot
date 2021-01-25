@@ -1,12 +1,11 @@
 -- [[ Variables ]]
-BOTConnection = nil
-Queue = {}
-LastMessage = nil
+local BOTConnection
+local Queue = {}
+local LastMessage = nil
 
 --[[ Functions ]]
 function YTJSON(URL, SearchFor, Payload)
     local TempArgs = (SearchFor ~= nil and SearchFor == true and 
-    --external-downloader aria2c --external-downloader-args "-x -s 8 -k 1M"
         { "--default-search", "ytsearch", "--dump-json", URL, "--external-downloader", "aria2c", "--external-downloader-args", '"-x -s 8 -k 1M"' } or 
         {                                 "--dump-json", URL, "--external-downloader", "aria2c", "--external-downloader-args", '"-x -s 8 -k 1M"' })
 
@@ -55,19 +54,18 @@ function YTJSON(URL, SearchFor, Payload)
     return VideoData
 end
 
---[[ https://gist.github.com/jesseadams/791673 ]]
 function SecondsToClock(Seconds)
 	local Seconds = tonumber(Seconds)
 
-	if Seconds <= 0 then
-		return "00:00"
-	else
-		local Hours = string.format("%02.f", math.floor(Seconds/3600))
-		local Mins = string.format("%02.f", math.floor(Seconds/60 - (Hours*60)))
-		local Secs = string.format("%02.f", math.floor(Seconds - Hours*3600 - Mins *60))
+    if Seconds > 0 then
+        if Seconds < 3600 then
+            return os.date('!%M:%S', Seconds)
+        end
 
-		return (tonumber(Hours) > 0 and Hours..":" or "")..Mins..":"..Secs
-	end
+        return os.date('!%H:%M:%S', Seconds)
+    end
+    
+    return "N/A"
 end
 
 function CheckSeekFormat(Seek)
@@ -104,38 +102,33 @@ end
 
 --[[ Commands ]]
 CommandManager.Command("summon", function(Args, Payload)
-    assert(Payload.member.voiceChannel, "you need to be connected to a channel.")
+    assert(BOTConnection.channel == nil, "I'm already connected to a channel.")
+    assert(Payload.member.voiceChannel ~= nil and Payload.member.voiceChannel.id == BOTConnection.channel.id, "you need to be in the same channel as me.")
     local MemberChannel = Payload.member.voiceChannel
-    assert(not BOTConnection or (BOTConnection and BOTConnection.channel ~= MemberChannel), "I'm not connected to any channel or you are not in the same channel as me.")
     
     BOTConnection = MemberChannel:join()
 end):SetCategory("Music Commands")
 
 CommandManager.Command("dc", function(Args, Payload)
-    assert(BOTConnection, "I am not connected to any channel.")
-    assert(Payload.member.voiceChannel, "you need to be connected to a channel.")
-    assert(Payload.member.voiceChannel.id == BOTConnection.channel.id, "you need to be in the same channel as me.")
+    assert(BOTConnection.channel, "I'm not connected to any channel.")
+    assert(Payload.member.voiceChannel ~= nil and Payload.member.voiceChannel.id == BOTConnection.channel.id, "you need to be in the same channel as me.")
 
     BOTConnection:close()
 end):SetCategory("Music Commands")
 
 CommandManager.Command("play", function(Args, Payload)
     assert(Args[2], "")
-    assert(Payload.member.voiceChannel, "you need to be connected to a channel.")
+    assert(Payload.member.voiceChannel ~= nil, "you need to be connected to a channel.")
     local MemberChannel = Payload.member.voiceChannel
 
-    if BOTConnection then
-        BOTConnection = Payload.guild.connection
-        assert(BOTConnection.channel.id == Payload.member.voiceChannel.id, "I'm already connected to another channel.")
+    if BOTConnection and BOTConnection.channel then
+        assert(BOTConnection.channel.id == Payload.member.voiceChannel.id, "I'm already connected to a channel.")
+    else
+        BOTConnection = MemberChannel:join()
     end
 
     local SearchFor = false
     local Search
-
-    if not BOTConnection then BOTConnection = MemberChannel:join() end
-
-    assert(BOTConnection, "I am not connected to any channel.")
-    assert(MemberChannel.id == BOTConnection.channel.id, "you need to be in the same channel as me.")
 
     if not Args[3] and Args[2]:match("https?://(([%w_.~!*:@&+$/?%%#-]-)(%w[-.%w]*%.)(%w+)(:?)(%d*)(/?)([%w_.~!*:@&+$/?%%#=-]*))") then
         Query = Args[2]
@@ -199,9 +192,8 @@ CommandManager.Command("play", function(Args, Payload)
 end):SetCategory("Music Commands"):AddAlias("p")
 
 CommandManager.Command("skip", function(Args, Payload)
-    assert(BOTConnection, "I am not connected to any channel.")
-    assert(Payload.member.voiceChannel, "you need to be connected to a channel.")
-    assert(Payload.member.voiceChannel.id == BOTConnection.channel.id, "you need to be in the same channel as me.")
+    assert(BOTConnection ~= nil and BOTConnection.channel ~= nil, "I'm not connected to any channel.")
+    assert(Payload.member.voiceChannel ~= nil and Payload.member.voiceChannel.id == BOTConnection.channel.id, "you need to be in the same channel as me.")
     assert(CurrentlyPlaying, "nothing is playing at the moment.")
 
     if CurrentlyPlaying.Message then
@@ -237,11 +229,10 @@ CommandManager.Command("skip", function(Args, Payload)
 end):SetCategory("Music Commands"):AddAlias("s")
 
 CommandManager.Command("pause", function(Args, Payload)
-    assert(BOTConnection, "I am not connected to any channel.")
-    assert(Payload.member.voiceChannel, "you need to be connected to a channel.")
-    assert(Payload.member.voiceChannel.id == BOTConnection.channel.id, "you need to be in the same channel as me.")
-    assert(CurrentlyPlaying, "nothing is playing at the moment.")
-    assert(not CurrentlyPlaying.Paused, "")
+    assert(BOTConnection ~= nil and BOTConnection.channel ~= nil, "I'm not connected to any channel.")
+    assert(Payload.member.voiceChannel ~= nil and Payload.member.voiceChannel.id == BOTConnection.channel.id, "you need to be in the same channel as me.")
+    assert(CurrentlyPlaying ~= nil, "nothing is playing at the moment.")
+    assert(CurrentlyPlaying.Paused == false, "")
 
     BOTConnection:pauseStream()
     CurrentlyPlaying.Paused = true
@@ -249,11 +240,10 @@ CommandManager.Command("pause", function(Args, Payload)
 end):SetCategory("Music Commands")
 
 CommandManager.Command("resume", function(Args, Payload)
-    assert(BOTConnection, "I am not connected to any channel.")
-    assert(Payload.member.voiceChannel, "you need to be connected to a channel.")
-    assert(Payload.member.voiceChannel.id == BOTConnection.channel.id, "you need to be in the same channel as me.")
+    assert(BOTConnection ~= nil and BOTConnection.channel ~= nil, "I'm not connected to any channel.")
+    assert(Payload.member.voiceChannel ~= nil and Payload.member.voiceChannel.id == BOTConnection.channel.id, "you need to be in the same channel as me.")
     assert(CurrentlyPlaying, "nothing is playing at the moment.")
-    assert(CurrentlyPlaying.Paused, "")
+    assert(CurrentlyPlaying.Paused == true, "")
 
     BOTConnection:resumeStream()
     CurrentlyPlaying.Paused = false
@@ -261,9 +251,8 @@ CommandManager.Command("resume", function(Args, Payload)
 end):SetCategory("Music Commands")
 
 CommandManager.Command("seek", function(Args, Payload)
-    assert(BOTConnection, "I am not connected to any channel.")
-    assert(Payload.member.voiceChannel, "you need to be connected to a channel.")
-    assert(Payload.member.voiceChannel.id == BOTConnection.channel.id, "you need to be in the same channel as me.")
+    assert(BOTConnection.channe ~= nil, "I'm not connected to any channel.")
+    assert(Payload.member.voiceChannel ~= nil and Payload.member.voiceChannel.id == BOTConnection.channel.id, "you need to be in the same channel as me.")
     assert(CurrentlyPlaying, "nothing is playing at the moment.")
     
     local Prefix = Config.Prefix
@@ -283,9 +272,8 @@ CommandManager.Command("seek", function(Args, Payload)
 end):SetCategory("Music Commands")
 
 CommandManager.Command("time", function(Args, Payload)
-    assert(BOTConnection, "I am not connected to any channel.")
-    assert(Payload.member.voiceChannel, "you need to be connected to a channel.")
-    assert(Payload.member.voiceChannel.id == BOTConnection.channel.id, "you need to be in the same channel as me.")
+    assert(BOTConnection ~= nil and BOTConnection.channel ~= nil, "I'm not connected to any channel.")
+    assert(Payload.member.voiceChannel ~= nil and Payload.member.voiceChannel.id == BOTConnection.channel.id, "you need to be in the same channel as me.")
     assert(CurrentlyPlaying and CurrentlyPlaying.StartTime, "nothing is playing at the moment.")
 
     local TimeElapsed = 0
@@ -319,29 +307,30 @@ CommandManager.Command("time", function(Args, Payload)
     }
 end):SetCategory("Music Commands")
 
-CommandManager.Command("queue", function(Args, Payload)
-    assert(BOTConnection, "I am not connected to any channel.")
-    assert(Payload.member.voiceChannel, "you need to be connected to a channel.")
-    assert(Payload.member.voiceChannel.id == BOTConnection.channel.id, "you need to be in the same channel as me.")
+CommandManager.Command("queue", function(Args, Payload) 
+    -- TODO: Add pages for a long queue
+    -- TODO: Make use of string padding.
+    assert(BOTConnection ~= nil and BOTConnection.channel ~= nil, "I'm not connected to any channel.")
+    assert(Payload.member.voiceChannel ~= nil and Payload.member.voiceChannel.id == BOTConnection.channel.id, "you need to be in the same channel as me.")
     assert(CurrentlyPlaying ~= nil, "nothing is playing at the moment.")
-    local QueueString = ""
+    local QueueString = "  Title"..string.rep(" ", 35).."| Duration\n"
     for i = 0, #Queue, 1 do
         QueueItem = (i == 0 and CurrentlyPlaying or Queue[i])
 
-        local QueueTitle = (#(QueueItem.Title) > 39 and "["..QueueItem.Title:sub(1, 39).."…]("..QueueItem.VideoURL..")" or "["..QueueItem.Title.."]("..QueueItem.VideoURL..")")
-        QueueString = QueueString..
-        (i == 0 and CurrentlyPlaying.Paused == true and "||" or i == 0 and CurrentlyPlaying.Paused == false and "→ " or "↳ ")..
-        "**"..
-        QueueTitle..
-        "**"..
-        " | "..
-        "``"..
-        os.date("!%H:%M:%S", QueueItem.Duration)..
-        "``"..
-        "\n"
+        local QueueTitle = (#(QueueItem.Title) > 39 and QueueItem.Title:sub(1, 38).."…" or QueueItem.Title)
+
+        QueueString = 
+            QueueString..
+            (i == 0 and CurrentlyPlaying.Paused == true and "∥" or i == 0 and CurrentlyPlaying.Paused == false and "→" or "↳")..
+            " "..
+            QueueTitle..
+            string.rep(" ", (39-#QueueTitle))..
+            " | "..
+            SecondsToClock(QueueItem.Duration)..
+            "\n"
     end
 
-    SimpleEmbed(Payload, QueueString)
+    SimpleEmbed(Payload, "```"..QueueString.."```")
 end):SetCategory("Music Commands")
 
 ClearQeue = CommandManager.Command("clearqueue", function(Args, Payload)
@@ -355,9 +344,7 @@ end):SetCategory("Music Commands")
 BOT:on("voiceDisconnect", function(Member)
 	coroutine.wrap(function()
 		if Member.user and Member.user == BOT.user then
-			if BOTConnection then
-				BOTConnection = nil
-            end
+			BOTConnection:stopStream()
             
             if CurrentlyPlaying and CurrentlyPlaying.Message then
                 CurrentlyPlaying.Message:delete()

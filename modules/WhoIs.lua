@@ -6,7 +6,13 @@ CommandManager.Command("whois", function(Args, Payload)
         Member = assert(Payload.guild:getMember(Args[2]), "failed to get member from ID")
     end
 
-    assert(Member.name and Member.user.discriminator and Member.id and Member.status and Member.joinedAt, "there was an issue getting some required information.")
+    assert(Member.name and Member.user.discriminator and Member.id and Member.status and Member.joinedAt and Member.roles, "there was an issue getting some required information.")
+
+    local AllRoleNames = {}
+
+    Payload.member.roles:forEach(function(Role)
+        table.insert(AllRoleNames, Role.mentionString)
+    end)
 
     Payload:reply {
         embed = {
@@ -33,7 +39,7 @@ CommandManager.Command("whois", function(Args, Payload)
                     ["inline"] = true
                 },
                 {
-                    ["name"] = "Joined PHS Discord",
+                    ["name"] = "Joined Guild",
                     ["value"] = (Member.joinedAt and Member.joinedAt:gsub("%..*", ""):gsub("T", " @ ") or "?"),
                     ["inline"] = true
                 },
@@ -41,6 +47,10 @@ CommandManager.Command("whois", function(Args, Payload)
                     ["name"] = "Joined Discord",
                     ["value"] = Discordia.Date().fromSnowflake(Member.id):toISO(" @ ", ""),
                     ["inline"] = true
+                },
+                {
+                    ["name"] = "Roles",
+                    ["value"] = table.concat(AllRoleNames, ", ")
                 }
             }
         }

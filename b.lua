@@ -53,14 +53,14 @@ function ReturnRestOfCommand(AllArgs, StartIndex, Seperator, EndIndex)
     return table.concat(AllArgs, (Seperator ~= nil and type(Seperator) == "string" and Seperator or " "), StartIndex, EndIndex)
 end
 
-function KillBOT()
+local function KillBOT()
 	_G = nil
 
 	process:exit(1)
 end
 
 --[[ Module Func ]]
-function LoadModule(Module)
+local function LoadModule(Module)
 	local FilePath = Config.ModuleDir.."/"..Module..".lua"
 	local Code = assert(FileReader.readFileSync(FilePath))
 	local Func = assert(loadstring(Code, "@"..Module, "t", ModuleENV))
@@ -74,8 +74,6 @@ do
 
 	ModuleENV = setmetatable({
 		require = require,
-
-		LoadModule = LoadModule,
 
 		Discordia = Discordia,
 		BOT = BOT,
@@ -114,7 +112,7 @@ do
 				else
 					Log(1, "Failed to load module "..FileName.." ["..Err.."]")
 
-					if Err:lower():find("fatal") ~= nil then
+					if Err:lower():find("fatal") then
 						KillBOT()
 					end
 				end
