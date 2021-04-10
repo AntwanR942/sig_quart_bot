@@ -1,57 +1,58 @@
 --[[ Variables ]]
-URLExt = {
-    ".jpg",
-    ".jpeg",
-    ".png"
+local Categories = {
+	"Anal",
+	"Ass",
+	"BDSM",
+	"Boobs",
+	"Creampie",
+	"Fisting",
+	"Gang",
+	"Gaping",
+	"Gay",
+	"Lesbian",
+	"Oral",
+	"Petite",
+	"Threesome",
+	"Vulva"
 }
 
-NSFWFolder = "NSFW/"
-assert(FileReader.existsSync(ModuleDir.."/"..NSFWFolder), "Coulnd't find NSFW folder ("..ModuleDir.."/"..NSFWFolder..").")
+local StaticExt = {
+	["jpg"] = true,
+	["jpeg"] = true,
+	["png"] = true
+}
+
+--[[ Database ]]
+local NSFWDB = SQL.open(Config.ModuleDir.."/NSFW")
 
 --[[ Functions ]]
-function GetNSFW(Type, Video)
-	local Content = FileReader.readFileSync(ModuleDir.."/"..NSFWFolder..Type..(Video ~= nil and Video or "")..".txt")
-	if Content then
-		Content = Content:split("\n")
-		math.randomseed(os.time())
-		local RandomIndex = math.floor(math.random() * #Content)
-		local URL = Content[RandomIndex]
-		if URL then 
-			local IsEmbed = false
-            for _, Ext in pairs(URLExt) do
-                if URL:find(Ext) then
-                    IsEmbed = true
-                end
-			end
+local function GetNSFW(Category, IsVideo)
+	local Statement = F("SELECT URL, IsVideo FROM %s %s ORDER BY RANDOM() LIMIT 1;", Category, (IsVideo == true and "WHERE IsVideo = 'Yes'" or ""))
 
-			return URL, IsEmbed
-		end
-	end
+	local URL, IsVideo = NSFWDB:rowexec(Statement)
 
-	return nil
+	if not URL or not IsVideo then return end
+
+	return URL, (IsVideo == "No" and true or false)
 end
 
---[[ Command Generator ]]
-for Dirty, _ in FileReader.scandirSync(ModuleDir.."/"..NSFWFolder) do
-	if Dirty:find("_") == nil then
-		Dirty = Dirty:gsub(".txt", "")
-		CommandManager.Command(Dirty:lower(), function(Args, Payload)
-			local URL, IsEmbed = GetNSFW(Dirty, (Args[2] ~= nil and Args[2] == "video" and "_videos" or nil))
+for _, Category in pairs(Categories) do
+	CommandManager.Command(Category:lower(), function(Args, Payload)
+		local URL, IsEmbed = GetNSFW(Category, (Args[2] ~= nil and Args[2] == "video" and true or false))
 
-			assert(URL ~= nil, "failed to retrieve NSFW content.")
-			
-			if IsEmbed then
-				Payload:reply {
-					embed = {
-						["color"] =   14782639,
-						["image"] = {
-							["url"] = URL
-						}
+		assert(URL ~= nil, "failed to retrieve NSFW content.")
+		
+		if IsEmbed then
+			return Payload:reply {
+				embed = {
+					["color"] =   14782639,
+					["image"] = {
+						["url"] = URL
 					}
 				}
-			else
-				Payload:reply(URL)
-			end
-		end):SetCategory("Dirty Commands"):SetDescription("||**NSFW** "..Dirty.." content.||")
-	end
+			}
+		end
+
+		Payload:reply(URL)
+	end):SetCategory("Dirty Commands"):SetDescription("||**NSFW** "..Category.." content.||")
 end

@@ -6,6 +6,7 @@ Query = require("querystring")
 Spawn = require("coro-spawn")
 FileReader = require("fs")
 PP = require("pretty-print")
+SQL = require("sqlite3")
 
 --[[ Config ]]
 Config, ConfigErr = FileReader.readFileSync("Config.json")
@@ -85,6 +86,7 @@ do
 		FileReader = FileReader,
 		PP = PP,
 		Query = Query,
+		SQL = SQL,
 
 		Config = Config,
 
@@ -93,6 +95,7 @@ do
 		Log = Log, 
 		Logger = Logger,
 		Round = math.round,
+		F = string.format,
 		SimpleEmbed = SimpleEmbed,
 		ReturnRestOfCommand = ReturnRestOfCommand,
 

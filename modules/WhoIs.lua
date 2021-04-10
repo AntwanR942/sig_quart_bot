@@ -10,7 +10,7 @@ CommandManager.Command("whois", function(Args, Payload)
 
     local AllRoleNames = {}
 
-    Payload.member.roles:forEach(function(Role)
+    Member.roles:forEach(function(Role)
         table.insert(AllRoleNames, Role.mentionString)
     end)
 

@@ -23,5 +23,7 @@ modules/Tag.json
 modules/UrbanDict.txt
 modules/Math.lua
 modules/SFS.lua
+modules/Fortnite.*
+*sqlite3.*
 *.dll
 desktop.ini
