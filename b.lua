@@ -45,9 +45,19 @@ function SimpleEmbed(Payload, Description)
 		["color"] = Config.EmbedColour
 	}
 
-	return (Payload ~= nil and Payload:reply {
-		embed = Embed
-	} or Embed)
+	if Payload ~= nil then
+		if Payload.username == nil then
+			return Payload:reply {
+				embed = Embed
+			}
+		else
+			return Payload:send {
+				embed = Embed
+			}
+		end
+	end 
+
+	return Embed
 end
 
 function ReturnRestOfCommand(AllArgs, StartIndex, Seperator, EndIndex)

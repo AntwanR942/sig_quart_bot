@@ -13,7 +13,6 @@ deps/discordia/libs/voice/*.lua
 !deps/discordia/libs/voice/VoiceConnection.lua
 deps/discordia/libs/voice/streams/*.lua
 !deps/discordia/libs/voice/streams/FFmpegProcess.lua
-_Clash/
 modules/Clash.lua
 modules/HouseRoles.lua
 modules/Moderation.lua
@@ -24,6 +23,8 @@ modules/UrbanDict.txt
 modules/Math.lua
 modules/SFS.lua
 modules/Fortnite.*
+modules/CoC/vendor
+modules/CoC/*.json
 *sqlite3.*
 *.dll
 desktop.ini
