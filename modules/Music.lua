@@ -6,8 +6,8 @@ local Queue = {}
 --[[ Functions ]]
 local function YTJSON(URL, SearchFor, Payload)
     local TempArgs = (SearchFor ~= nil and SearchFor == true and 
-        { "--default-search", "ytsearch", "--dump-json", URL, "--external-downloader", "aria2c", "--external-downloader-args", '"-x -s 8 -k 1M"' } or 
-        {                                 "--dump-json", URL, "--external-downloader", "aria2c", "--external-downloader-args", '"-x -s 8 -k 1M"' })
+        { "--default-search", "ytsearch", "--cookies", "cookies.txt", "--dump-json", URL, "--external-downloader", "aria2c", "--external-downloader-args", '"-x -s 8 -k 1M"' } or 
+        {                                 "--cookies", "cookies.txt", "--dump-json", URL, "--external-downloader", "aria2c", "--external-downloader-args", '"-x -s 8 -k 1M"' })
 
     local YoutubeDL = Spawn("youtube-dl", {
         args = TempArgs,
@@ -15,17 +15,13 @@ local function YTJSON(URL, SearchFor, Payload)
     })
 
     local YoutubeDLOut = YoutubeDL.stdout.read
-    local YoutubeDLData
+    local YoutubeDLData = ""
 
     for Res in YoutubeDLOut do
-        if not Res:find("ERROR") then
-            YoutubeDLData = JSON.decode(Res)
-            
-            break
-        end
+        YoutubeDLData = YoutubeDLData..Res
 	end
 
-    if not YoutubeDLData then 
+    if #YoutubeDLData == 0 or not YoutubeDLData.formats then 
         return false, "I couldn't find what you were looking for."
     end
 
