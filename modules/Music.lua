@@ -163,6 +163,8 @@ CommandManager.Command("play", function(Args, Payload)
 
     local Suc, AudioData = YTJSON(Query, SearchFor, Payload)
 
+    assert(Suc == true, AudioData)
+
     if Search then
         Search:delete()
     end
