@@ -21,8 +21,10 @@ local function YTJSON(URL, SearchFor, Payload)
         YoutubeDLData = YoutubeDLData..Res
 	end
 
-    if #YoutubeDLData == 0 or not YoutubeDLData.formats then 
-        return false, "I couldn't find what you were looking for."
+    local YoutubeDLData = assert(JSON.decode(YoutubeDLData), "there was a problem issue on our end, please try again.")
+
+    if not YoutubeDLData.formats then
+        return false, "there was no available content for your request."
     end
 
     local VideoData = {}
